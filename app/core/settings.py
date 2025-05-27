@@ -1,3 +1,4 @@
+# app/core/settings.py
 from pydantic_settings import BaseSettings
 from pydantic import Field
 
@@ -14,11 +15,10 @@ class Settings(BaseSettings):
         env_file = ".env"
         env_file_encoding = "utf-8"
 
-# the “real” settings
 settings = Settings()
 
-# module‐level aliases for backward compatibility
+# backwards‐compatible module‐level names
 SECRET_KEY = settings.secret_key
 ALGORITHM  = settings.algorithm
-DATABASE_URL = settings.database_url
 ACCESS_TOKEN_EXPIRE_MINUTES = settings.access_token_expire_minutes
+DATABASE_URL = settings.database_url
