@@ -1,44 +1,42 @@
-# app/api/currency.py
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-
 from app.core.database import get_db
 from app.core.security import get_current_user
 from app.models.player import Player
-from app.schemas.currency import CurrencyBase, CurrencyUpdate, CurrencyResponse
+from app.schemas.currency import CurrencyResponse, CurrencyUpdate, CurrencyPatch
 
-currency_router = APIRouter(prefix="/players/me/currency", tags=["currency"])
+router = APIRouter(tags=["currency"])
 
-@currency_router.get("", response_model=CurrencyResponse)
-def get_currency(current: Player = Depends(get_current_user)):
-    return CurrencyResponse.from_orm(current)
+@router.get("/players/me/currency", response_model=CurrencyResponse)
+def get_currency(current_user: Player = Depends(get_current_user)):
+    return current_user
 
-@currency_router.put("", response_model=CurrencyResponse)
+@router.put("/players/me/currency", response_model=CurrencyResponse)
 def set_currency(
-    payload: CurrencyBase,
+    update: CurrencyUpdate,
     db: Session = Depends(get_db),
-    current: Player = Depends(get_current_user),
+    current_user: Player = Depends(get_current_user),
 ):
-    if payload.real_currency < 0 or payload.game_currency < 0:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Balances cannot be negative")
-    current.real_currency = payload.real_currency
-    current.game_currency = payload.game_currency
+    if update.real_currency < 0 or update.game_currency < 0:
+        raise HTTPException(status_code=400, detail="Currency cannot be negative")
+    current_user.real_currency = update.real_currency
+    current_user.game_currency = update.game_currency
     db.commit()
-    db.refresh(current)
-    return CurrencyResponse.from_orm(current)
+    db.refresh(current_user)
+    return current_user
 
-@currency_router.patch("", response_model=CurrencyResponse)
-def update_currency(
-    payload: CurrencyUpdate,
+@router.patch("/players/me/currency", response_model=CurrencyResponse)
+def patch_currency(
+    patch: CurrencyPatch,
     db: Session = Depends(get_db),
-    current: Player = Depends(get_current_user),
+    current_user: Player = Depends(get_current_user),
 ):
-    new_real = current.real_currency + payload.real_currency
-    new_game = current.game_currency + payload.game_currency
+    new_real = current_user.real_currency + patch.real_currency
+    new_game = current_user.game_currency + patch.game_currency
     if new_real < 0 or new_game < 0:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Insufficient funds")
-    current.real_currency = new_real
-    current.game_currency = new_game
+        raise HTTPException(status_code=400, detail="Insufficient funds")
+    current_user.real_currency = new_real
+    current_user.game_currency = new_game
     db.commit()
-    db.refresh(current)
-    return CurrencyResponse.from_orm(current)
+    db.refresh(current_user)
+    return current_user

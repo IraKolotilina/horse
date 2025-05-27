@@ -1,14 +1,17 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
+from typing import Optional
 
 class CurrencyBase(BaseModel):
-    real_currency: int = Field(0, ge=0)
-    game_currency: int = Field(0, ge=0)
-
-class CurrencyUpdate(BaseModel):
-    # can be negative here when PATCHing
-    real_currency: int = 0
-    game_currency: int = 0
+    real_currency: float
+    game_currency: int
 
 class CurrencyResponse(CurrencyBase):
     class Config:
         orm_mode = True
+
+class CurrencyUpdate(CurrencyBase):
+    pass
+
+class CurrencyPatch(BaseModel):
+    real_currency: Optional[float] = 0.0
+    game_currency: Optional[int] = 0
