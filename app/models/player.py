@@ -1,8 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime
-from sqlalchemy.orm import declarative_base
-from datetime import datetime, timezone
+from datetime import datetime
 from app.core.database import Base
-from sqlalchemy.orm import relationship
 
 class Player(Base):
     __tablename__ = "players"
@@ -11,11 +9,12 @@ class Player(Base):
     username = Column(String, unique=True, index=True, nullable=False)
     email = Column(String, unique=True, nullable=False)
     password = Column(String, nullable=False)
-    last_login = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
-    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
-    buildings = relationship("Building", back_populates="player", cascade="all, delete-orphan")
+    last_login = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # ← Добавили валюту
+    real_currency = Column(Integer, default=0, nullable=False)
+    game_currency = Column(Integer, default=0, nullable=False)
 
     def __repr__(self):
-        return f"<Player(id={self.id}, username='{self.username}', email='{self.email}')>"
-
-    
+        return f"<Player(id={self.id}, username='{self.username}')>"

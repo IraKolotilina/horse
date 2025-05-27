@@ -1,20 +1,35 @@
-from pydantic import BaseModel, EmailStr
 from typing import Optional
+from pydantic import BaseModel
 
 class PlayerCreate(BaseModel):
     username: str
-    email: EmailStr
+    email: str
     password: str
 
 class PlayerResponse(BaseModel):
     id: int
     username: str
-    email: EmailStr
+    email: str
 
     class Config:
-        from_attributes = True  # актуально для Pydantic v2+
+        from_attributes = True
 
 class PlayerUpdate(BaseModel):
-    email: Optional[EmailStr] = None
+    email: Optional[str] = None
     password: Optional[str] = None
 
+# ↓↓↓ Новые схемы
+class CurrencyResponse(BaseModel):
+    real: int
+    game: int
+
+    class Config:
+        from_attributes = True
+
+class CurrencySet(BaseModel):
+    real: int
+    game: int
+
+class CurrencyDelta(BaseModel):
+    real: Optional[int] = 0
+    game: Optional[int] = 0
