@@ -1,8 +1,9 @@
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime, Boolean
 from sqlalchemy.orm import relationship
-from app.core.database import Base
 import uuid
 from datetime import datetime
+from app.models.base import Base
+
 
 class Horse(Base):
     __tablename__ = "horses"

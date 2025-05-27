@@ -1,17 +1,17 @@
-from pydantic import BaseSettings, Field
+# убрали Pydantic BaseSettings, оставили простой класс
+class Settings:
+    # секрет для JWT
+    secret_key: str = "your_secret_key"
+    algorithm: str = "HS256"
+    access_token_expire_minutes: int = 60
 
-class Settings(BaseSettings):
-    secret_key: str = Field("your_secret_key", env="SECRET_KEY")
-    algorithm: str = Field("HS256", env="ALGORITHM")
-    access_token_expire_minutes: int = Field(60, env="ACCESS_TOKEN_EXPIRE_MINUTES")
-    database_url: str = Field("sqlite:///./test.db", env="DATABASE_URL")
+    # строка подключения к БД; подменяйте под prod
+    database_url: str = "sqlite:///./test.db"
 
-    class Config:
-        env_file = ".env"
 
 settings = Settings()
 
-# экспорт для удобства
+# экспорты для удобства
 SECRET_KEY = settings.secret_key
 ALGORITHM = settings.algorithm
 ACCESS_TOKEN_EXPIRE_MINUTES = settings.access_token_expire_minutes

@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, ForeignKey, String
-from app.core.database import Base
+from app.models.base import Base
+
 
 class PlayerCurrency(Base):
     __tablename__ = "player_currency"
