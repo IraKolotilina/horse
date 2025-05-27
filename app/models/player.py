@@ -1,6 +1,6 @@
-from sqlalchemy import Column, Integer, String, DateTime
-from datetime import datetime
+from sqlalchemy import Column, Integer, String, DateTime, Float
 from sqlalchemy.orm import relationship
+from datetime import datetime
 from app.core.database import Base
 
 class Player(Base):
@@ -13,7 +13,9 @@ class Player(Base):
     last_login = Column(DateTime, default=datetime.utcnow)
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    real_currency = Column(Integer, default=0)
-    game_currency = Column(Integer, default=0)
+    # --- новые поля для валюты ---
+    real_currency = Column(Float, default=0.0, nullable=False)
+    game_currency = Column(Float, default=0.0, nullable=False)
 
-    stables = relationship("Stable", back_populates="owner")
+    # отношение к Stable (если понадобится)
+    stables = relationship("Stable", back_populates="player")

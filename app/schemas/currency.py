@@ -1,17 +1,16 @@
-# app/schemas/currency.py
 from pydantic import BaseModel
 
 class CurrencyResponse(BaseModel):
-    real: int
-    game: int
+    real: float
+    game: float
 
     class Config:
         from_attributes = True
 
 class CurrencyUpdate(BaseModel):
-    real: int
-    game: int
+    real: float
+    game: float
 
 class CurrencyChange(BaseModel):
-    real: int = 0
-    game: int = 0
+    real: float = 0.0
+    game: float = 0.0
