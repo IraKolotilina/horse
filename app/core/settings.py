@@ -1,15 +1,13 @@
-from pydantic_settings import BaseSettings
-from pydantic import Field
+# app/core/settings.py
+from pydantic import BaseSettings, Field
 
 class Settings(BaseSettings):
+    database_url: str = Field(..., env="DATABASE_URL")
     secret_key: str = Field("your_secret_key", env="SECRET_KEY")
-    database_url: str = Field(
-        "postgresql://horse_user:horse_pass@localhost/horse_game_db",
-        env="DATABASE_URL",
-    )
+    algorithm: str = Field("HS256", env="ALGORITHM")
 
     class Config:
-        extra = "ignore"
         env_file = ".env"
+        env_file_encoding = "utf-8"
 
 settings = Settings()
