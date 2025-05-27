@@ -1,15 +1,18 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+# app/models/stable.py
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
+from datetime import datetime
 from app.core.database import Base
 
 class Stable(Base):
     __tablename__ = "stables"
 
     id = Column(Integer, primary_key=True, index=True)
+    owner_id = Column(Integer, ForeignKey("players.id"), nullable=False)
     name = Column(String, nullable=False)
-    level = Column(Integer, default=1, nullable=False)
-    player_id = Column(Integer, ForeignKey("players.id"), nullable=False)
+    level = Column(Integer, default=1)
+    created_at = Column(DateTime, default=datetime.utcnow)
 
-    player = relationship("Player", back_populates="stables")
-    boxes = relationship("Box", back_populates="stable", cascade="all, delete-orphan")
-    buildings = relationship("Building", back_populates="stable", cascade="all, delete-orphan")
+    owner = relationship("Player", back_populates="stables")
+    boxes = relationship("Box", back_populates="stable")
+    buildings = relationship("Building", back_populates="stable")

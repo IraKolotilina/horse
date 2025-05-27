@@ -13,7 +13,7 @@ class Player(Base):
     last_login = Column(DateTime, default=datetime.utcnow)
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    real_currency = Column(Integer, default=0, nullable=False)
-    game_currency = Column(Integer, default=0, nullable=False)
+    real_currency = Column(Integer, default=0)
+    game_currency = Column(Integer, default=0)
 
-    stables = relationship("Stable", back_populates="player", cascade="all, delete-orphan")
+    stables = relationship("Stable", back_populates="owner")

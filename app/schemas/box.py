@@ -1,11 +1,10 @@
-# app/schemas/building.py
+# app/schemas/box.py
 from pydantic import BaseModel
 from datetime import datetime
 
-class BuildingResponse(BaseModel):
+class BoxResponse(BaseModel):
     id: int
-    type: str
-    level: int
+    name: str
     created_at: datetime
 
     class Config:
