@@ -1,16 +1,16 @@
-from pydantic import BaseModel
-
-class CurrencyResponse(BaseModel):
-    real: float
-    game: float
-
-    class Config:
-        from_attributes = True
+from pydantic import BaseModel, Field
 
 class CurrencyUpdate(BaseModel):
-    real: float
-    game: float
+    real_currency: int = Field(0, ge=0)
+    game_currency: int = Field(0, ge=0)
 
-class CurrencyChange(BaseModel):
-    real: float = 0.0
-    game: float = 0.0
+class CurrencyPatch(BaseModel):
+    real_currency: int = Field(0)
+    game_currency: int = Field(0)
+
+class CurrencyResponse(BaseModel):
+    real_currency: int
+    game_currency: int
+
+    class Config:
+        orm_mode = True
