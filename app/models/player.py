@@ -13,9 +13,7 @@ class Player(Base):
     last_login = Column(DateTime, default=datetime.utcnow)
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    # новые поля для валюты
     real_currency = Column(Integer, default=0, nullable=False)
     game_currency = Column(Integer, default=0, nullable=False)
 
-    # связи
     stables = relationship("Stable", back_populates="player", cascade="all, delete-orphan")
