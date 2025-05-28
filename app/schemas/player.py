@@ -1,5 +1,7 @@
 from typing import Optional
 from pydantic import BaseModel
+from app.core.security import hash_password
+
 
 class PlayerCreate(BaseModel):
     username: str

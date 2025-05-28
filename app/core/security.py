@@ -1,4 +1,5 @@
 # app/core/security.py
+
 from datetime import datetime, timedelta, timezone
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -8,16 +9,23 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.settings import settings
-from app.models.player  import Player
+from app.models.player import Player
 
-pwd_context   = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+
 
 def verify_password(plain: str, hashed: str) -> bool:
     return pwd_context.verify(plain, hashed)
 
+
 def get_password_hash(pw: str) -> str:
     return pwd_context.hash(pw)
+
+
+# Alias for backward-compatibility / imports in players router
+hash_password = get_password_hash
+
 
 def create_access_token(
     data: dict,
@@ -35,6 +43,7 @@ def create_access_token(
         settings.SECRET_KEY,
         algorithm=settings.ALGORITHM,
     )
+
 
 def get_current_user(
     token: str = Depends(oauth2_scheme),
