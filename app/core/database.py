@@ -1,10 +1,11 @@
 # app/core/database.py
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from app.core.settings import DATABASE_URL
+from app.core.settings import settings
+from app.models.base import Base
 
-engine = create_engine(DATABASE_URL, echo=True, future=True)
-SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, future=True)
+engine = create_engine(settings.DATABASE_URL, connect_args={"check_same_thread": False})
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def get_db():
     db = SessionLocal()
@@ -12,3 +13,11 @@ def get_db():
         yield db
     finally:
         db.close()
+
+def init_db():
+    # регистрируем все модели перед созданием таблиц
+    import app.models.player
+    import app.models.stable
+    import app.models.building
+    # … другие модели …
+    Base.metadata.create_all(bind=engine)

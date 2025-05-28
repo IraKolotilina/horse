@@ -1,14 +1,10 @@
 # app/core/settings.py
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
-import os
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    DATABASE_URL: str
+    SECRET_KEY: str
+    ALGORITHM: str = "HS256"
 
-# database
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://horse_user:horse_pass@localhost/horse_game_db"
-)
-
-# JWT
-SECRET_KEY = os.getenv("SECRET_KEY", "your_secret_key")
-ALGORITHM = os.getenv("ALGORITHM", "HS256")
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
+settings = Settings()
