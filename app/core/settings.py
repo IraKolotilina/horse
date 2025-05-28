@@ -1,18 +1,14 @@
-# убрали Pydantic BaseSettings, оставили простой класс
-class Settings:
-    # секрет для JWT
-    secret_key: str = "your_secret_key"
-    algorithm: str = "HS256"
-    access_token_expire_minutes: int = 60
+# app/core/settings.py
 
-    # строка подключения к БД; подменяйте под prod
-    database_url: str = "sqlite:///./test.db"
+import os
 
+# database
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "postgresql://horse_user:horse_pass@localhost/horse_game_db"
+)
 
-settings = Settings()
-
-# экспорты для удобства
-SECRET_KEY = settings.secret_key
-ALGORITHM = settings.algorithm
-ACCESS_TOKEN_EXPIRE_MINUTES = settings.access_token_expire_minutes
-DATABASE_URL = settings.database_url
+# JWT
+SECRET_KEY = os.getenv("SECRET_KEY", "your_secret_key")
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))

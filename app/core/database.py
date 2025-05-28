@@ -1,12 +1,10 @@
+# app/core/database.py
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from app.core.settings import DATABASE_URL
 
-# для SQLite нужен этот аргумент
-connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
-
-engine = create_engine(DATABASE_URL, connect_args=connect_args)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+engine = create_engine(DATABASE_URL, echo=True, future=True)
+SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, future=True)
 
 def get_db():
     db = SessionLocal()
