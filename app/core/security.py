@@ -9,7 +9,7 @@ from app.core.database import get_db
 from app.core.settings import settings
 from app.models.player import Player
 
-pwd_context   = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 def verify_password(plain: str, hashed: str) -> bool:
@@ -17,9 +17,6 @@ def verify_password(plain: str, hashed: str) -> bool:
 
 def get_password_hash(pw: str) -> str:
     return pwd_context.hash(pw)
-
-# добавили алиас, чтобы из players.py можно было `from app.core.security import hash_password`
-hash_password = get_password_hash
 
 def create_access_token(
     data: dict,
@@ -40,9 +37,9 @@ def create_access_token(
 
 def get_current_user(
     token: str = Depends(oauth2_scheme),
-    db:    Session = Depends(get_db),
+    db: Session = Depends(get_db),
 ) -> Player:
-    creds_exc = HTTPException(
+    credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
@@ -54,12 +51,12 @@ def get_current_user(
             algorithms=[settings.ALGORITHM],
         )
         username: str = payload.get("sub")
-        if not username:
-            raise creds_exc
+        if username is None:
+            raise credentials_exception
     except JWTError:
-        raise creds_exc
+        raise credentials_exception
 
     user = db.query(Player).filter(Player.username == username).first()
-    if not user:
-        raise creds_exc
+    if user is None:
+        raise credentials_exception
     return user

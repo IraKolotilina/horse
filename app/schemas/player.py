@@ -1,37 +1,20 @@
-from typing import Optional
-from pydantic import BaseModel
-from app.core.security import hash_password
+from pydantic import BaseModel, EmailStr, Field
 
+class PlayerBase(BaseModel):
+    username: str = Field(..., min_length=3)
+    email: EmailStr
 
-class PlayerCreate(BaseModel):
-    username: str
-    email: str
-    password: str
-
-class PlayerResponse(BaseModel):
-    id: int
-    username: str
-    email: str
-
-    class Config:
-        from_attributes = True
+class PlayerCreate(PlayerBase):
+    password: str = Field(..., min_length=6)
 
 class PlayerUpdate(BaseModel):
-    email: Optional[str] = None
-    password: Optional[str] = None
+    email: EmailStr | None = None
+    password: str | None   = None
 
-# ↓↓↓ Новые схемы
-class CurrencyResponse(BaseModel):
-    real: int
-    game: int
+class PlayerOut(PlayerBase):
+    id: int
+    real_currency: int
+    game_currency: int
 
     class Config:
         from_attributes = True
-
-class CurrencySet(BaseModel):
-    real: int
-    game: int
-
-class CurrencyDelta(BaseModel):
-    real: Optional[int] = 0
-    game: Optional[int] = 0

@@ -1,32 +1,46 @@
-# app/api/stables.py
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+
 from app.core.database import get_db
 from app.core.security import get_current_user
-from app.models.player   import Player
-from app.models.stable   import Stable
-from app.models.building import Building
-from app.models.box      import Box
-from app.schemas.stable  import StableCreate, StableResponse
+from app.models.stable import Stable
+from app.models.box import Box
 
 stable_router = APIRouter(prefix="/stables", tags=["stables"])
 
-@stable_router.post("", response_model=StableResponse)
+@stable_router.post("/", status_code=status.HTTP_200_OK)
 def create_stable(
-    data: StableCreate,
+    data: dict,
     db: Session = Depends(get_db),
-    current: Player = Depends(get_current_user)
+    current_user = Depends(get_current_user),
 ):
-    s = Stable(name=data.name, level=1, owner_id=current.id)
-    db.add(s)
+    name = data.get("name")
+    if not name:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Name is required"
+        )
+    stable = Stable(name=name, owner_id=current_user.id)
+    db.add(stable)
     db.commit()
-    db.refresh(s)
-    # always create one administration building
-    admin = Building(type="administration", level=1, stable_id=s.id)
-    db.add(admin)
-    # level=1 stable → 2 boxes
+    db.refresh(stable)
+
+    # после создания для уровня 1 по ТЗ создаём два бокса
     for _ in range(2):
-        db.add(Box(stable_id=s.id))
+        box = Box(stable_id=stable.id)
+        db.add(box)
     db.commit()
-    db.refresh(s)
-    return s
+
+    return {"id": stable.id, "name": stable.name, "level": stable.level}
+
+@stable_router.get("/", status_code=status.HTTP_200_OK)
+def list_stables(
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user),
+):
+    stables = db.query(Stable).filter(Stable.owner_id == current_user.id).all()
+    return [
+        {"id": s.id, "name": s.name, "level": s.level,
+         "boxes": [b.id for b in s.boxes]}
+        for s in stables
+    ]

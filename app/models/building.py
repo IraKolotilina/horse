@@ -1,8 +1,6 @@
-# app/models/building.py
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
-
-from app.models.base import Base   # ← same Base everywhere
+from app.models.base import Base
 
 class Building(Base):
     __tablename__ = "buildings"
