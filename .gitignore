@@ -1,19 +1,37 @@
-# Python
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
+*.pyo
+
+# Environment files
 *.env
+.env
 *.venv
 venv/
-.env
 
-# SQLite
+# SQLite database files
 *.db
 
-# VSCode
+# VSCode project folder
 .vscode/
 
-# pyenv
+# pyenv local python version file
 .python-version
 
-# mypy
+# mypy type checker cache
 .mypy_cache/
+
+# pytest cache
+.pytest_cache/
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# MacOS/Unix junk files
+.DS_Store
+Thumbs.db
