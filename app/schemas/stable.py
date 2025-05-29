@@ -1,29 +1,25 @@
+# app/schemas/stable.py
 from pydantic import BaseModel
+from typing import List
+
+class BoxOut(BaseModel):
+    id: int
+    name: str
+    capacity: int
+    stable_id: int
+
+    class Config:
+        orm_mode = True
 
 class StableCreate(BaseModel):
     name: str
 
-class BoxResponse(BaseModel):
-    id: int
-    occupied: bool
-
-    class Config:
-        orm_mode = True
-
-class BuildingResponse(BaseModel):
-    id: int
-    type: str
-    level: int
-
-    class Config:
-        orm_mode = True
-
-class StableResponse(BaseModel):
+class StableOut(BaseModel):
     id: int
     name: str
     level: int
-    boxes: list[BoxResponse]
-    buildings: list[BuildingResponse]
+    owner_id: int
+    boxes: List[BoxOut] = []
 
     class Config:
         orm_mode = True

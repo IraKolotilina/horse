@@ -1,20 +1,23 @@
-from pydantic import BaseModel, EmailStr, Field
+# app/schemas/player.py
+from datetime import datetime
+from typing import Optional
+from pydantic import BaseModel, EmailStr
 
-class PlayerBase(BaseModel):
-    username: str = Field(..., min_length=3)
+class PlayerCreate(BaseModel):
+    username: str
     email: EmailStr
+    password: str
 
-class PlayerCreate(PlayerBase):
-    password: str = Field(..., min_length=6)
-
-class PlayerUpdate(BaseModel):
-    email: EmailStr | None = None
-    password: str | None   = None
-
-class PlayerOut(PlayerBase):
+class PlayerOut(BaseModel):
     id: int
-    real_currency: int
-    game_currency: int
+    username: str
+    email: EmailStr
+    last_login: Optional[datetime]
+    created_at: datetime
 
     class Config:
-        from_attributes = True
+        orm_mode = True
+
+class PlayerUpdate(BaseModel):
+    email: Optional[EmailStr] = None
+    password: Optional[str]   = None

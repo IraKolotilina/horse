@@ -1,49 +1,49 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+# app/api/currency.py
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from app.core.database import get_db
-from app.core.security import get_current_user
-from app.schemas.currency import Currency, CurrencyUpdate, CurrencyDelta
-from app.models.player import Player
+from app.schemas.currency import CurrencyUpdate, CurrencyOut
+from app.core.database       import get_db
+from app.core.security       import get_current_user
+from app.models.player       import Player as PlayerModel
 
-currency_router = APIRouter(prefix="/players/me/currency", tags=["currency"])
+currency_router = APIRouter()
 
-@currency_router.get("/", response_model=Currency)
-def get_currency(current_user: Player = Depends(get_current_user)):
-    return Currency(
-        real_currency=current_user.real_currency,
-        game_currency=current_user.game_currency
-    )
+@currency_router.get("/", response_model=CurrencyOut)
+def get_balance(current: PlayerModel = Depends(get_current_user)):
+    return {
+        "real_currency": current.real_currency,
+        "game_currency": current.game_currency
+    }
 
-@currency_router.put("/", response_model=Currency)
-def set_currency(
+@currency_router.post("/add", response_model=CurrencyOut)
+def add_currency(
     data: CurrencyUpdate,
     db: Session = Depends(get_db),
-    current_user: Player = Depends(get_current_user),
+    current: PlayerModel = Depends(get_current_user)
 ):
-    current_user.real_currency = data.real_currency
-    current_user.game_currency = data.game_currency
-    db.add(current_user)
+    current.real_currency += data.real
+    current.game_currency += data.game
     db.commit()
-    db.refresh(current_user)
-    return data
+    db.refresh(current)
+    return {
+        "real_currency": current.real_currency,
+        "game_currency": current.game_currency
+    }
 
-@currency_router.patch("/", response_model=Currency)
-def change_currency(
-    data: CurrencyDelta,
+@currency_router.post("/spend", response_model=CurrencyOut)
+def spend_currency(
+    data: CurrencyUpdate,
     db: Session = Depends(get_db),
-    current_user: Player = Depends(get_current_user),
+    current: PlayerModel = Depends(get_current_user)
 ):
-    new_real = current_user.real_currency + data.real_delta
-    new_game = current_user.game_currency + data.game_delta
-    if new_real < 0 or new_game < 0:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Insufficient funds"
-        )
-    current_user.real_currency = new_real
-    current_user.game_currency = new_game
-    db.add(current_user)
+    if current.real_currency < data.real or current.game_currency < data.game:
+        raise HTTPException(status_code=400, detail="Not enough currency")
+    current.real_currency -= data.real
+    current.game_currency -= data.game
     db.commit()
-    db.refresh(current_user)
-    return Currency(real_currency=new_real, game_currency=new_game)
+    db.refresh(current)
+    return {
+        "real_currency": current.real_currency,
+        "game_currency": current.game_currency
+    }

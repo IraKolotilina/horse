@@ -1,3 +1,4 @@
+# app/models/stable.py
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 from app.models.base import Base
@@ -11,4 +12,4 @@ class Stable(Base):
     owner_id = Column(Integer, ForeignKey("players.id"), nullable=False)
 
     owner = relationship("Player", back_populates="stables")
-    boxes = relationship("Box", back_populates="stable", cascade="all, delete")
+    boxes = relationship("Box",    back_populates="stable")

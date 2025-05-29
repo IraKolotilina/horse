@@ -1,4 +1,6 @@
-from sqlalchemy import Column, Integer, String, DateTime, func
+# app/models/player.py
+from datetime import datetime
+from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.orm import relationship
 from app.models.base import Base
 
@@ -9,13 +11,12 @@ class Player(Base):
     username      = Column(String, unique=True, index=True, nullable=False)
     email         = Column(String, unique=True, index=True, nullable=False)
     password      = Column(String, nullable=False)
-    created_at    = Column(DateTime(timezone=True), server_default=func.now())
-    last_login    = Column(DateTime(timezone=True), onupdate=func.now())
+    last_login    = Column(DateTime, default=None)
+    created_at    = Column(DateTime, default=datetime.utcnow)
 
-    real_currency = Column(Integer, default=0, nullable=False)
-    game_currency = Column(Integer, default=0, nullable=False)
+    real_currency = Column(Integer, default=0)
+    game_currency = Column(Integer, default=0)
 
-    # связи
-    buildings = relationship("Building", back_populates="owner", cascade="all, delete")
-    boxes     = relationship("Box",      back_populates="stable", cascade="all, delete")
-    stables   = relationship("Stable",   back_populates="owner", cascade="all, delete")
+    buildings = relationship("Building", back_populates="owner")
+    stables   = relationship("Stable",   back_populates="owner")
+    # при желании можно добавить boxes через back_populates

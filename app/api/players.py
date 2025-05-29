@@ -1,55 +1,49 @@
+# app/api/players.py
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.core.database import get_db
-from app.core.security import get_password_hash, get_current_user
-from app.schemas.player import PlayerCreate, PlayerUpdate, PlayerOut
-from app.models.player import Player
+from app.schemas.player  import PlayerCreate, PlayerOut, PlayerUpdate
+from app.core.database   import get_db
+from app.core.security   import hash_password, get_current_user
+from app.models.player   import Player as PlayerModel
 
-player_router = APIRouter(prefix="/players", tags=["players"])
+player_router = APIRouter()
 
 @player_router.post("/", response_model=PlayerOut)
-def register_player(
-    data: PlayerCreate,
-    db: Session = Depends(get_db),
-):
-    if db.query(Player).filter(
-        (Player.username == data.username) | (Player.email == data.email)
+def register_player(user: PlayerCreate, db: Session = Depends(get_db)):
+    if db.query(PlayerModel).filter(
+        (PlayerModel.username == user.username) |
+        (PlayerModel.email == user.email)
     ).first():
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Username or email already registered"
-        )
-    user = Player(
-        username=data.username,
-        email=data.email,
-        password=get_password_hash(data.password)
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Username or email already registered")
+    db_user = PlayerModel(
+        username=user.username,
+        email=user.email,
+        password=hash_password(user.password)
     )
-    db.add(user)
+    db.add(db_user)
     db.commit()
-    db.refresh(user)
-    return user
+    db.refresh(db_user)
+    return db_user
 
 @player_router.get("/me", response_model=PlayerOut)
-def read_profile(current_user: Player = Depends(get_current_user)):
-    return current_user
+def read_profile(current: PlayerModel = Depends(get_current_user)):
+    return current
 
 @player_router.put("/me", response_model=PlayerOut)
 def update_profile(
     data: PlayerUpdate,
     db: Session = Depends(get_db),
-    current_user: Player = Depends(get_current_user),
+    current: PlayerModel = Depends(get_current_user),
 ):
     if not data.email and not data.password:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="No data provided"
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="No data to update")
     if data.email:
-        current_user.email = data.email
+        current.email = data.email
     if data.password:
-        current_user.password = get_password_hash(data.password)
-    db.add(current_user)
+        current.password = hash_password(data.password)
     db.commit()
-    db.refresh(current_user)
-    return current_user
+    db.refresh(current)
+    return current

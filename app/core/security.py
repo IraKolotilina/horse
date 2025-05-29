@@ -1,3 +1,4 @@
+# app/core/security.py
 from datetime import datetime, timedelta, timezone
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -9,14 +10,14 @@ from app.core.database import get_db
 from app.core.settings import settings
 from app.models.player import Player
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context   = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 def verify_password(plain: str, hashed: str) -> bool:
     return pwd_context.verify(plain, hashed)
 
-def get_password_hash(pw: str) -> str:
-    return pwd_context.hash(pw)
+def hash_password(password: str) -> str:
+    return pwd_context.hash(password)
 
 def create_access_token(
     data: dict,
@@ -28,7 +29,7 @@ def create_access_token(
         if expires_delta
         else datetime.now(timezone.utc) + timedelta(minutes=15)
     )
-    to_encode.update({"exp": expire, "sub": data.get("sub")})
+    to_encode.update({"exp": expire, "sub": data["sub"]})
     return jwt.encode(
         to_encode,
         settings.SECRET_KEY,
@@ -37,9 +38,9 @@ def create_access_token(
 
 def get_current_user(
     token: str = Depends(oauth2_scheme),
-    db: Session = Depends(get_db),
+    db:    Session = Depends(get_db),
 ) -> Player:
-    credentials_exception = HTTPException(
+    creds_exc = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
@@ -51,12 +52,12 @@ def get_current_user(
             algorithms=[settings.ALGORITHM],
         )
         username: str = payload.get("sub")
-        if username is None:
-            raise credentials_exception
+        if not username:
+            raise creds_exc
     except JWTError:
-        raise credentials_exception
+        raise creds_exc
 
     user = db.query(Player).filter(Player.username == username).first()
-    if user is None:
-        raise credentials_exception
+    if not user:
+        raise creds_exc
     return user

@@ -1,13 +1,13 @@
-from pydantic import BaseModel, conint
+# app/schemas/currency.py
+from pydantic import BaseModel
 
-class Currency(BaseModel):
+class CurrencyUpdate(BaseModel):
+    real: int
+    game: int
+
+class CurrencyOut(BaseModel):
     real_currency: int
     game_currency: int
 
-class CurrencyUpdate(BaseModel):
-    real_currency: conint(ge=0)
-    game_currency: conint(ge=0)
-
-class CurrencyDelta(BaseModel):
-    real_delta: int
-    game_delta: int
+    class Config:
+        orm_mode = True
