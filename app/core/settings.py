@@ -12,3 +12,6 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
 
 settings = Settings()
+
+
+
