@@ -1,15 +1,14 @@
 # app/schemas/stable.py
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import List
+from pydantic import ConfigDict
 
 class BoxOut(BaseModel):
     id: int
     name: str
     capacity: int
     stable_id: int
-
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class StableCreate(BaseModel):
     name: str
@@ -20,6 +19,4 @@ class StableOut(BaseModel):
     level: int
     owner_id: int
     boxes: List[BoxOut] = []
-
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)

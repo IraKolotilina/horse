@@ -1,5 +1,6 @@
 # app/schemas/currency.py
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
+from pydantic import ConfigDict
 
 class CurrencyUpdate(BaseModel):
     real: int
@@ -8,6 +9,4 @@ class CurrencyUpdate(BaseModel):
 class CurrencyOut(BaseModel):
     real_currency: int
     game_currency: int
-
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)

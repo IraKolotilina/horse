@@ -1,5 +1,5 @@
 # app/schemas/box.py
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 
 class BoxResponse(BaseModel):

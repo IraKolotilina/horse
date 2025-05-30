@@ -1,7 +1,8 @@
 # app/schemas/player.py
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, ConfigDict
+from pydantic import ConfigDict
 
 class PlayerCreate(BaseModel):
     username: str
@@ -14,9 +15,7 @@ class PlayerOut(BaseModel):
     email: EmailStr
     last_login: Optional[datetime]
     created_at: datetime
-
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class PlayerUpdate(BaseModel):
     email: Optional[EmailStr] = None
