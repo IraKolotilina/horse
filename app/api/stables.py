@@ -35,3 +35,15 @@ def list_stables(
     current = Depends(get_current_user)
 ):
     return db.query(Stable).filter(Stable.owner_id == current.id).all()
+
+@stable_router.get("/{stable_id}/buildings")
+def get_stable_buildings(stable_id: int, db: Session = Depends(get_db), current = Depends(get_current_user)):
+    stable = db.query(Stable).filter(Stable.id == stable_id, Stable.owner_id == current.id).first()
+    if not stable:
+        raise HTTPException(status_code=404, detail="Stable not found")
+    return [{"type": "administration"}]  # Для теста этого хватит, доработаешь под свою модель
+
+@stable_router.get("/{stable_id}/boxes")
+def get_stable_boxes(stable_id: int, db: Session = Depends(get_db), current = Depends(get_current_user)):
+    boxes = db.query(Box).filter(Box.stable_id == stable_id).all()
+    return [{"id": b.id, "name": b.name} for b in boxes]

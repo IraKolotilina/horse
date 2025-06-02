@@ -3,10 +3,10 @@ from pydantic import BaseModel, ConfigDict
 from pydantic import ConfigDict
 
 class CurrencyUpdate(BaseModel):
+    real: int = 0
+    game: int = 0
+
+class CurrencyOut(BaseModel):
     real: int
     game: int
 
-class CurrencyOut(BaseModel):
-    real_currency: int
-    game_currency: int
-    model_config = ConfigDict(from_attributes=True)
