@@ -9,6 +9,6 @@ class Box(Base):
     id        = Column(Integer, primary_key=True, index=True)
     name      = Column(String, nullable=False)
     capacity  = Column(Integer, default=1)
-    stable_id = Column(Integer, ForeignKey("stables.id"), nullable=False)
+    stable_id = Column(String, ForeignKey("stables.id", ondelete="CASCADE"), nullable=True)
 
     stable = relationship("Stable", back_populates="boxes")

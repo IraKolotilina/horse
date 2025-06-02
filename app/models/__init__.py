@@ -5,3 +5,6 @@ from .player   import Player   # или Player
 from .building import Building
 from .box      import Box
 from .stable   import Stable
+from .horse import Horse
+
+

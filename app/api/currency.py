@@ -16,8 +16,6 @@ def get_balance(current: PlayerModel = Depends(get_current_user)):
     "game": current.game_currency
 }
 
-
-
 @currency_router.post("/add", response_model=CurrencyOut)
 def add_currency(
     data: CurrencyUpdate,

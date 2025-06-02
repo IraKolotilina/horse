@@ -4,7 +4,6 @@ import uuid
 from datetime import datetime
 from app.models.base import Base
 
-
 class Horse(Base):
     __tablename__ = "horses"
 
@@ -27,6 +26,7 @@ class Horse(Base):
     pregnant_since = Column(DateTime, nullable=True)
     stable_id = Column(String, ForeignKey("stables.id"), nullable=True)
 
+    # Обратная связь с владельцем
     owner = relationship("Player", back_populates="horses")
     stable = relationship("Stable", back_populates="horses")
 
