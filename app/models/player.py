@@ -3,7 +3,6 @@ from datetime import datetime
 from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.orm import relationship
 from app.models.base import Base
-from sqlalchemy.orm import relationship
 
 class Player(Base):
     __tablename__ = "players"
@@ -17,10 +16,6 @@ class Player(Base):
 
     real_currency = Column(Integer, default=0)
     game_currency = Column(Integer, default=0)
-
     buildings = relationship("Building", back_populates="owner")
     stables = relationship("Stable", back_populates="owner", cascade="all, delete-orphan")
     horses = relationship("Horse", back_populates="owner", cascade="all, delete-orphan")
-
-    
-

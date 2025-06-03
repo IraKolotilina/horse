@@ -1,13 +1,12 @@
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime, Boolean
 from sqlalchemy.orm import relationship
-import uuid
 from datetime import datetime
 from app.models.base import Base
 
 class Horse(Base):
     __tablename__ = "horses"
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     name = Column(String, nullable=False)
     owner_id = Column(Integer, ForeignKey("players.id"), nullable=False)
 
@@ -24,9 +23,8 @@ class Horse(Base):
 
     is_pregnant = Column(Boolean, default=False)
     pregnant_since = Column(DateTime, nullable=True)
-    stable_id = Column(String, ForeignKey("stables.id"), nullable=True)
+    stable_id = Column(Integer, ForeignKey("stables.id"), nullable=True)
 
-    # Обратная связь с владельцем
     owner = relationship("Player", back_populates="horses")
     stable = relationship("Stable", back_populates="horses")
 
