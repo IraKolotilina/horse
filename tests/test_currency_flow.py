@@ -2,6 +2,8 @@ import uuid
 import pytest
 from fastapi.testclient import TestClient
 from app.main import app
+from typing import Optional
+
 
 client = TestClient(app)
 

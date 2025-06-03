@@ -1,4 +1,6 @@
 from sqlalchemy import create_engine, text
+from typing import Optional
+
 
 url = "postgresql://horse_user:horse_pass@localhost/horse_game_db"
 engine = create_engine(url)

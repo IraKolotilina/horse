@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-
 from app.schemas.player  import PlayerCreate, PlayerOut, PlayerUpdate
 from app.schemas.currency import CurrencyUpdate, CurrencyOut
 from app.core.database   import get_db
@@ -96,3 +95,28 @@ def spend_currency(
         "real": current.real_currency,
         "game": current.game_currency
     }
+from pydantic import BaseModel, EmailStr
+
+class PlayerUpdate(BaseModel):
+    email: Optional[EmailStr] = None
+    password: Optional[str] = None
+
+@player_router.put("/update")
+def update_player_profile(
+    data: PlayerUpdate,
+    db: Session = Depends(get_db),
+    current_user: PlayerModel = Depends(get_current_user)
+):
+    user = db.query(PlayerModel).filter(PlayerModel.id == current_user.id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if data.email:
+        user.email = data.email
+
+    if data.password:
+        from app.core.security import get_password_hash
+        user.password = get_password_hash(data.password)
+
+    db.commit()
+    return {"detail": "Profile updated"}

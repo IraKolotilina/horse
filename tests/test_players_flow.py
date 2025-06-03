@@ -2,6 +2,7 @@ import uuid
 import pytest
 from fastapi.testclient import TestClient
 from app.main import app
+from typing import Optional
 
 client = TestClient(app)
 
@@ -148,4 +149,34 @@ def test_access_with_invalid_token():
     response = client.get("/players/me", headers=headers)
     assert response.status_code == 401
     assert response.json()["detail"] == "Could not validate credentials"
+
+def test_update_profile(auth_headers):
+    new_email = f"updated_{uuid.uuid4().hex[:6]}@example.com"
+    new_password = "newsecurepass"
+
+    update_data = {
+        "email": new_email,
+        "password": new_password
+    }
+
+    # Обновляем профиль
+    resp = client.put("/players/update", json=update_data, headers=auth_headers)
+    assert resp.status_code == 200
+
+    # Пытаемся залогиниться со старым паролем — должен быть отказ
+    old_login = client.post(
+        "/auth/login",
+        data={"username": auth_headers['Authorization'].split()[1], "password": "securepass"},
+        headers={"Content-Type": "application/x-www-form-urlencoded"}
+    )
+    assert old_login.status_code == 400
+
+    # Логинимся с новым паролем
+    login = client.post(
+        "/auth/login",
+        data={"username": auth_headers['Authorization'].split()[1], "password": new_password},
+        headers={"Content-Type": "application/x-www-form-urlencoded"}
+    )
+    assert login.status_code == 200
+
 
