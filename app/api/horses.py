@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from uuid import uuid4
 import random
-from datetime import datetime
+from datetime import datetime, timezone
 
 from app.core.database import get_db
 from app.core.security import get_current_user
@@ -28,10 +28,17 @@ def create_horse(
     db: Session = Depends(get_db),
     current_user: PlayerModel = Depends(get_current_user)
 ):
-    # Проверка: у пользователя есть хотя бы одна конюшня
-    stable = db.query(Stable).filter(Stable.owner_id == current_user.id).first()
+    # Использовать переданный stable_id или первую доступную
+    if data.stable_id:
+        stable = db.query(Stable).filter(
+            Stable.id == data.stable_id,
+            Stable.owner_id == current_user.id
+        ).first()
+    else:
+        stable = db.query(Stable).filter(Stable.owner_id == current_user.id).first()
+
     if not stable:
-        raise HTTPException(status_code=400, detail="No stable available for this user")
+        raise HTTPException(status_code=400, detail="No available stable found for this user.")
 
     new_horse = Horse(
         id=str(uuid4()),
@@ -47,7 +54,7 @@ def create_horse(
         owner_id=current_user.id,
         stable_id=stable.id,
         is_pregnant=False,
-        created_at=datetime.utcnow()
+        created_at=datetime.now(timezone.utc)
     )
 
     db.add(new_horse)

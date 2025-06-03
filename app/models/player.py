@@ -1,5 +1,5 @@
 # app/models/player.py
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.orm import relationship
 from app.models.base import Base
@@ -12,7 +12,8 @@ class Player(Base):
     email         = Column(String, unique=True, index=True, nullable=False)
     password      = Column(String, nullable=False)
     last_login    = Column(DateTime, default=None)
-    created_at    = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now(timezone.utc))
+
 
     real_currency = Column(Integer, default=0)
     game_currency = Column(Integer, default=0)

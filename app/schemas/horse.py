@@ -9,11 +9,11 @@ class HorseCreate(BaseModel):
     speed: float
     stamina: float
     strength: float
+    stable_id: Optional[str]  # 👈 строка, так как это UUID в String-формате
 
 class HorseResponse(HorseCreate):
-    id: str
+    id: str  # 👈 UUID строкой
     owner_id: int
-    stable_id: Optional[str]
     gene_speed: str
     gene_stamina: str
     gene_strength: str
@@ -21,5 +21,4 @@ class HorseResponse(HorseCreate):
     pregnant_since: Optional[datetime]
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

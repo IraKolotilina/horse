@@ -56,6 +56,7 @@ def test_multiple_stables_have_admin(auth_headers):
 
     for sid in ids:
         buildings = client.get(f"/stables/{sid}/buildings", headers=auth_headers)
+        assert buildings.status_code == 200
         assert any(b["type"] == "administration" for b in buildings.json())
 
 
@@ -71,8 +72,14 @@ def test_level1_stable_has_2_boxes_and_can_create_horse(auth_headers):
     horse_data = {
         "name": generate_unique_name("horse"),
         "gender": "female",
-        "stable_id": stable_id
+        "breed": "arabian",
+        "speed": 10.0,
+        "stamina": 8.0,
+        "strength": 9.0,
+        "stable_id": stable_id  # <-- UUID как строка
     }
+
     horse = client.post("/horses/", json=horse_data, headers=auth_headers)
     assert horse.status_code == 200
     assert horse.json()["name"] == horse_data["name"]
+    assert horse.json()["stable_id"] == stable_id

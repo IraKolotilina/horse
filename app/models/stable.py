@@ -5,8 +5,7 @@ from app.models.base import Base
 
 class Stable(Base):
     __tablename__ = "stables"
-
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     name = Column(String, nullable=False)
     owner_id = Column(Integer, ForeignKey("players.id", ondelete="CASCADE"), nullable=False)
     level = Column(Integer, default=1)
