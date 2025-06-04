@@ -1,5 +1,7 @@
 import uuid
 import pytest
+from typing import Optional
+from app.models.player import Player
 from fastapi.testclient import TestClient
 from app.main import app
 
@@ -35,14 +37,12 @@ def test_get_initial_currency(auth_token):
     resp = client.get("/players/me/currency", headers=headers)
     assert resp.status_code == 200, resp.text
     data = resp.json()
-    # Ожидаем, что по умолчанию у нового игрока и реал, и игровая валюта = 0
     assert "real" in data and "game" in data
     assert data["real"] == 0
     assert data["game"] == 0
 
 def test_add_currency(auth_token):
     headers = {"Authorization": f"Bearer {auth_token}"}
-    # Пополняем баланс
     update = {"real": 150, "game": 300}
     resp = client.put("/players/me/currency", json=update, headers=headers)
     assert resp.status_code == 200, resp.text
@@ -52,16 +52,14 @@ def test_add_currency(auth_token):
 
 def test_spend_currency(auth_token):
     headers = {"Authorization": f"Bearer {auth_token}"}
-    # Тратим часть валюты
     spend = {"real": -50, "game": -100}
     resp = client.patch("/players/me/currency", json=spend, headers=headers)
     assert resp.status_code == 200, resp.text
     data = resp.json()
-    assert data["real"] == 100   # 150−50
-    assert data["game"] == 200   # 300−100
+    assert data["real"] == 100   # 150 - 50
+    assert data["game"] == 200   # 300 - 100
 
 def test_overspend_currency(auth_token):
     headers = {"Authorization": f"Bearer {auth_token}"}
-    # Пытаемся потратить больше, чем есть
     resp = client.patch("/players/me/currency", json={"game": -500}, headers=headers)
     assert resp.status_code == 400, "Должна быть ошибка при попытке перерасхода"

@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from uuid import uuid4
 import random
+from typing import Optional
 from datetime import datetime, timezone
-
 from app.core.database import get_db
 from app.core.security import get_current_user
 from app.models.horse import Horse

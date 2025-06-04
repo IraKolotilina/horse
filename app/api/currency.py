@@ -1,11 +1,11 @@
 # app/api/currency.py
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-
+from typing import Optional
 from app.schemas.currency import CurrencyUpdate, CurrencyOut
-from app.core.database       import get_db
-from app.core.security       import get_current_user
-from app.models.player       import Player as PlayerModel
+from app.core.database import get_db
+from app.core.security import get_current_user
+from app.models.player import Player as PlayerModel
 
 currency_router = APIRouter()
 
