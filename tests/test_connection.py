@@ -1,5 +1,6 @@
-from sqlalchemy import create_engine, text
 from typing import Optional
+from app.models.player import Player
+from sqlalchemy import create_engine, text
 
 
 url = "postgresql://horse_user:horse_pass@localhost/horse_game_db"
