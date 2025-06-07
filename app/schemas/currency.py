@@ -1,12 +1,14 @@
 # app/schemas/currency.py
 from pydantic import BaseModel, ConfigDict
 from pydantic import ConfigDict
+from typing import Optional
 
 class CurrencyUpdate(BaseModel):
-    real: int = 0
-    game: int = 0
+    real: Optional[int] = 0
+    game: Optional[int] = 0
 
 class CurrencyOut(BaseModel):
     real: int
     game: int
+
 

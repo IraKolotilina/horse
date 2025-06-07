@@ -1,6 +1,8 @@
 # app/schemas/stable.py
 from pydantic import BaseModel, ConfigDict
 from typing import List
+from typing import Optional
+
 
 class BoxOut(BaseModel):
     id: int

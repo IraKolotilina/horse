@@ -1,8 +1,7 @@
 # app/api/stables.py
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-
+from typing import Optional
 from app.schemas.stable import StableCreate, StableOut, BoxOut
 from app.core.database import get_db
 from app.core.security import get_current_user
@@ -10,6 +9,7 @@ from app.models.stable import Stable
 from app.models.box import Box
 from app.models.player import Player
 from app.models.horse import Horse
+
 
 stable_router = APIRouter()
 

@@ -1,5 +1,7 @@
 import uuid
 import pytest
+from typing import Optional
+from app.models.player import Player
 from fastapi.testclient import TestClient
 from app.main import app
 
@@ -124,7 +126,7 @@ def test_update_with_empty_payload(access_token):
     headers = {"Authorization": f"Bearer {access_token}"}
     response = client.put("/players/me", headers=headers, json={})
     assert response.status_code == 200
-    
+
 def test_register_existing_user(registered_user):
     response = client.post("/players/", json=registered_user)
     assert response.status_code == 400
@@ -149,3 +151,28 @@ def test_access_with_invalid_token():
     assert response.status_code == 401
     assert response.json()["detail"] == "Could not validate credentials"
 
+def test_update_profile(access_token, registered_user):
+    new_email = f"updated_{uuid.uuid4().hex[:6]}@example.com"
+    new_password = "newsecurepass"
+    headers = {"Authorization": f"Bearer {access_token}"}
+
+    # Обновляем профиль по правильному пути
+    update_data = {"email": new_email, "password": new_password}
+    resp = client.put("/players/me", json=update_data, headers=headers)
+    assert resp.status_code == 200
+
+    # Пытаемся залогиниться со старым паролем — должен быть отказ
+    old_login = client.post(
+        "/auth/login",
+        data={"username": registered_user["username"], "password": "securepass"},
+        headers={"Content-Type": "application/x-www-form-urlencoded"}
+    )
+    assert old_login.status_code != 200
+
+    # Логинимся с новым паролем
+    login = client.post(
+        "/auth/login",
+        data={"username": registered_user["username"], "password": new_password},
+        headers={"Content-Type": "application/x-www-form-urlencoded"}
+    )
+    assert login.status_code == 200
