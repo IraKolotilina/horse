@@ -1,24 +1,69 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, Field
 from typing import Optional
-from datetime import datetime
+from enum import Enum
+
+
+class HorseType(str, Enum):
+    standard = "standard"
+    legendary = "legendary"
+
 
 class HorseCreate(BaseModel):
     name: str
     gender: str
     breed: str
+
     speed: float
     stamina: float
     strength: float
-    stable_id: Optional[str]  # 👈 строка, так как это UUID в String-формате
+    jump: float
+    height: float
 
-class HorseResponse(HorseCreate):
-    id: str  # 👈 UUID строкой
-    owner_id: int
+    type: Optional[HorseType] = HorseType.standard
+    stable_id: Optional[str] = None
+
+
+class HorseResponse(BaseModel):
+    id: str
+    name: str
+    gender: str
+    breed: str
+
+    speed: float
+    stamina: float
+    strength: float
+    jump: float
+    height: float
+    age: int
+    type: HorseType
+
     gene_speed: str
     gene_stamina: str
     gene_strength: str
-    is_pregnant: bool
-    pregnant_since: Optional[datetime]
-    created_at: datetime
+    gene_jump: str
 
-    model_config = ConfigDict(from_attributes=True)
+    owner_id: int
+    stable_id: str
+    is_pregnant: bool  # 🔧 ДОБАВЬ ЭТО СЮДА
+    # можно также добавить pregnant_since: Optional[datetime] если нужно
+
+    class Config:
+        from_attributes = True
+
+
+
+class HorseBreedRequest(BaseModel):
+    mother_id: str
+    father_id: str
+    foal_name: str
+
+
+class HorseUpdate(BaseModel):
+    name: Optional[str] = None
+    speed: Optional[float] = None
+    stamina: Optional[float] = None
+    strength: Optional[float] = None
+    jump: Optional[float] = None
+    height: Optional[float] = None
+    age: Optional[int] = Field(None, ge=0)
+    type: Optional[HorseType] = None

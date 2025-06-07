@@ -1,12 +1,15 @@
 # app/api/stables.py
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from app.schemas.stable  import StableCreate, StableOut, BoxOut
-from app.core.database   import get_db
-from app.core.security   import get_current_user
-from app.models.stable   import Stable
-from app.models.box      import Box
+from app.schemas.stable import StableCreate, StableOut, BoxOut
+from app.core.database import get_db
+from app.core.security import get_current_user
+from app.models.stable import Stable
+from app.models.box import Box
+from app.models.player import Player
+from app.models.horse import Horse
 
 stable_router = APIRouter()
 
@@ -14,7 +17,7 @@ stable_router = APIRouter()
 def create_stable(
     data: StableCreate,
     db: Session = Depends(get_db),
-    current = Depends(get_current_user)
+    current: Player = Depends(get_current_user)
 ):
     new = Stable(name=data.name, owner_id=current.id)
     db.add(new)
@@ -33,7 +36,7 @@ def create_stable(
 @stable_router.get("/", response_model=list[StableOut])
 def list_stables(
     db: Session = Depends(get_db),
-    current = Depends(get_current_user)
+    current: Player = Depends(get_current_user)
 ):
     return db.query(Stable).filter(Stable.owner_id == current.id).all()
 
@@ -41,7 +44,7 @@ def list_stables(
 def get_stable_buildings(
     stable_id: str,
     db: Session = Depends(get_db),
-    current = Depends(get_current_user)
+    current: Player = Depends(get_current_user)
 ):
     stable = db.query(Stable).filter(
         Stable.id == stable_id,
@@ -50,13 +53,20 @@ def get_stable_buildings(
     if not stable:
         raise HTTPException(status_code=404, detail="Stable not found")
 
-    # todo: заменить на реальные данные из моделей
+    # Здесь можно возвращать настоящие здания, пока мок
     return [{"type": "administration"}]
 
 @stable_router.get("/{stable_id}/boxes", response_model=list[BoxOut])
 def get_stable_boxes(
     stable_id: str,
     db: Session = Depends(get_db),
-    current = Depends(get_current_user)
+    current: Player = Depends(get_current_user)
 ):
-    return db.query(Box).filter(Box.stable_id == stable_id).all()
+    stable = db.query(Stable).filter(
+        Stable.id == stable_id,
+        Stable.owner_id == current.id
+    ).first()
+    if not stable:
+        raise HTTPException(status_code=404, detail="Stable not found")
+
+    return db.query(Box).filter(Box.stable_id == stable.id).all()

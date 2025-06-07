@@ -69,17 +69,42 @@ def test_level1_stable_has_2_boxes_and_can_create_horse(auth_headers):
     assert boxes.status_code == 200
     assert len(boxes.json()) == 2
 
-    horse_data = {
-        "name": generate_unique_name("horse"),
+    # Лошадь 1
+    horse_data_1 = {
+        "name": generate_unique_name("horse1"),
         "gender": "female",
-        "breed": "arabian",
+        "breed": "Arabian",
         "speed": 10.0,
         "stamina": 8.0,
         "strength": 9.0,
-        "stable_id": stable_id  # <-- UUID как строка
+        "jump": 7.5,
+        "height": 160.0,
+        "type": "standard",
+        "stable_id": stable_id
     }
 
-    horse = client.post("/horses/", json=horse_data, headers=auth_headers)
-    assert horse.status_code == 200
-    assert horse.json()["name"] == horse_data["name"]
-    assert horse.json()["stable_id"] == stable_id
+    horse1 = client.post("/horses/", json=horse_data_1, headers=auth_headers)
+    assert horse1.status_code == 200
+    h1 = horse1.json()
+    assert h1["name"] == horse_data_1["name"]
+    assert h1["stable_id"] == stable_id
+
+    # Лошадь 2
+    horse_data_2 = {
+        "name": generate_unique_name("horse2"),
+        "gender": "male",
+        "breed": "Arabian",
+        "speed": 11.0,
+        "stamina": 9.0,
+        "strength": 10.0,
+        "jump": 8.0,
+        "height": 162.0,
+        "type": "standard",
+        "stable_id": stable_id
+    }
+
+    horse2 = client.post("/horses/", json=horse_data_2, headers=auth_headers)
+    assert horse2.status_code == 200
+    h2 = horse2.json()
+    assert h2["name"] == horse_data_2["name"]
+    assert h2["stable_id"] == stable_id
