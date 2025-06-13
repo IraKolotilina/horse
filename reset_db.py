@@ -6,6 +6,12 @@ import sys
 import os
 import time
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+import app.models.player
+import app.models.stable
+import app.models.building
+import app.models.box
+import app.models.horse
+
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from app.core.config import settings  # берёт переменные из .env

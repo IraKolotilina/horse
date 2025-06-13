@@ -11,5 +11,6 @@ class Building(Base):
     stable_id = Column(String, ForeignKey("stables.id"), nullable=False)
     owner_id = Column(String, ForeignKey("players.id"), nullable=False)  # ОБЯЗАТЕЛЬНО!
     
+    
     stable = relationship("Stable", back_populates="buildings")
     owner = relationship("Player", back_populates="buildings")
