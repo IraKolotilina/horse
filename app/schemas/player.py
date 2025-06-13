@@ -12,11 +12,13 @@ class PlayerCreate(BaseModel):
 class PlayerOut(BaseModel):
     id: int
     username: str
-    email: EmailStr
-    last_login: Optional[datetime]
-    created_at: datetime
+    email: Optional[str] = None
+    last_login: Optional[datetime] = None
+    created_at: Optional[datetime] = None
     model_config = ConfigDict(from_attributes=True)
 
 class PlayerUpdate(BaseModel):
     email: Optional[EmailStr] = None
     password: Optional[str]   = None
+
+model_config = ConfigDict(from_attributes=True)
