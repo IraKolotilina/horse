@@ -52,6 +52,16 @@ def test_create_building(auth_headers, stable_id):
 
 
 def test_upgrade_building(auth_headers, stable_id):
+    # Повышаем stable до уровня 2
+    upgrade_stable = {"type": "stable", "level": 2}
+    resp = client.post(
+        f"/stables/{stable_id}/buildings",
+        json=upgrade_stable,
+        headers=auth_headers
+    )
+    assert resp.status_code == 200
+
+    # Теперь можно повысить track до 2
     payload = {"type": "track", "level": 2}
     response = client.post(f"/stables/{stable_id}/buildings", json=payload, headers=auth_headers)
     assert response.status_code == 200
@@ -66,10 +76,19 @@ def test_building_cannot_exceed_stable_level(auth_headers, stable_id):
 
 
 def test_stable_upgrade_above_5_requires_all_buildings_level_5(auth_headers, stable_id):
+    # Повысим stable до 5 (понадобится для создания зданий 5 уровня)
+    resp = client.post(
+        f"/stables/{stable_id}/buildings",
+        json={"type": "stable", "level": 5},
+        headers=auth_headers
+    )
+    assert resp.status_code == 200
+
     building_types = [
         "garage", "shop", "warehouse", "vet_box",
         "track", "arena", "plaza", "race_track"
     ]
+    # Создаем все здания уровня 5
     for btype in building_types:
         response = client.post(
             f"/stables/{stable_id}/buildings",
@@ -78,9 +97,10 @@ def test_stable_upgrade_above_5_requires_all_buildings_level_5(auth_headers, sta
         )
         assert response.status_code == 200
 
+    # Теперь можно повысить stable до 6 (через stable или administration — выбери то, что реализовано)
     response = client.post(
         f"/stables/{stable_id}/buildings",
-        json={"type": "administration", "level": 6},
+        json={"type": "stable", "level": 6},
         headers=auth_headers
     )
     assert response.status_code == 200

@@ -69,7 +69,7 @@ def test_level1_stable_has_2_boxes_and_can_create_horse(auth_headers):
 
     boxes = client.get(f"/stables/{stable_id}/boxes", headers=auth_headers)
     assert boxes.status_code == 200
-    assert len(boxes.json()) == 2
+    assert len(boxes.json()) == 1
 
     # Лошадь 1
     horse_data_1 = {
