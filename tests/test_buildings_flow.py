@@ -6,6 +6,11 @@ from app.main import app
 client = TestClient(app)
 
 
+
+
+client = TestClient(app)
+
+
 def generate_name(prefix="building"):
     return f"{prefix}_{uuid.uuid4().hex[:4]}"
 

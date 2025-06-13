@@ -1,9 +1,10 @@
 import uuid
 import pytest
-from typing import Optional
-from app.models.player import Player
 from fastapi.testclient import TestClient
 from app.main import app
+
+client = TestClient(app)
+
 
 client = TestClient(app)
 

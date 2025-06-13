@@ -2,7 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import Optional
 
-from app.schemas.stable import StableCreate, StableOut, BoxOut, BuildingCreate, BuildingOut
+from app.schemas.stable import StableCreate, StableOut
+from app.schemas.box import BoxOut
+from app.schemas.building import BuildingCreate, BuildingOut
 from app.core.database import get_db
 from app.core.security import get_current_user
 from app.models.stable import Stable
@@ -10,23 +12,11 @@ from app.models.box import Box
 from app.models.building import Building
 from app.models.player import Player
 from app.models.horse import Horse
-from app.schemas.building import BuildingCreate, BuildingOut
-from app.schemas.box import BoxOut
-from app.schemas.stable import StableCreate, StableOut
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-from app.schemas.stable import StableCreate, StableOut
-from app.schemas.building import BuildingCreate, BuildingOut
-from app.core.database import get_db
-from app.core.security import get_current_user
-from app.models.stable import Stable
-from app.models.box import Box
-from app.models.building import Building
-from app.models.player import Player
+
+import uuid
 
 stable_router = APIRouter()
 
-# Типы зданий и лимиты
 BUILDING_TYPES = {
     "field": None,
     "lumber_mill": None,
@@ -40,11 +30,10 @@ BUILDING_TYPES = {
     "plaza": 1,
     "race_track": 1,
     "administration": 1,
-    "stable": 1
+    "stable": 1,
 }
 
 MAX_RESOURCE_BUILDINGS = 9  # поле + лесопилка + пастбище
-
 
 @stable_router.post("/", response_model=StableOut)
 def create_stable(
@@ -52,20 +41,21 @@ def create_stable(
     db: Session = Depends(get_db),
     current: Player = Depends(get_current_user)
 ):
-    # Создание Stable
     new = Stable(name=data.name, owner_id=current.id)
     db.add(new)
     db.flush()
 
-    # Автоматически создаём здание "administration"
+    # Создаём здание администрации с owner_id!
     admin_building = Building(
+        id=str(uuid.uuid4()),
         type="administration",
         level=1,
-        stable_id=new.id
+        stable_id=new.id,
+        owner_id=current.id
     )
     db.add(admin_building)
 
-    # Количество боксов = уровню stable (по умолчанию 1)
+    # Создаём боксы (количество = уровень stable)
     for i in range(new.level):
         db.add(Box(name=f"Box {i+1}", stable_id=new.id))
 
@@ -73,14 +63,12 @@ def create_stable(
     db.refresh(new)
     return new
 
-
 @stable_router.get("/", response_model=list[StableOut])
 def list_stables(
     db: Session = Depends(get_db),
     current: Player = Depends(get_current_user)
 ):
     return db.query(Stable).filter(Stable.owner_id == current.id).all()
-
 
 @stable_router.get("/{stable_id}/boxes", response_model=list[BoxOut])
 def get_boxes(
@@ -90,7 +78,6 @@ def get_boxes(
 ):
     return db.query(Box).filter(Box.stable_id == stable_id).all()
 
-
 @stable_router.get("/{stable_id}/buildings", response_model=list[BuildingOut])
 def get_stable_buildings(
     stable_id: str,
@@ -98,7 +85,6 @@ def get_stable_buildings(
     current: Player = Depends(get_current_user)
 ):
     return db.query(Building).filter(Building.stable_id == stable_id).all()
-
 
 @stable_router.post("/{stable_id}/buildings", response_model=BuildingOut)
 def build_building(
@@ -139,35 +125,28 @@ def build_building(
         if total + 1 > MAX_RESOURCE_BUILDINGS:
             raise HTTPException(status.HTTP_400_BAD_REQUEST, "Resource building limit reached")
 
-    # Повышение уровня stable ("конюшни")
-    if btype == "stable":
+    # Повышение уровня stable
+    if btype in ("stable", "administration"):
         if blevel > stable.level:
-            # Проверка: нельзя повысить stable выше порога, пока все остальные здания не равны этому порогу
-            threshold = (stable.level // 5) * 5 + 5
-            if blevel > threshold:
+            current_threshold = (stable.level // 5) * 5
+            required_level = current_threshold + 5
+            if blevel > required_level:
                 raise HTTPException(status.HTTP_400_BAD_REQUEST,
-                                    f"Cannot raise stable above level {threshold} without all buildings being level {threshold}")
-            all_buildings = db.query(Building).filter(
-                Building.stable_id == stable_id,
-                Building.type != "stable"
-            ).all()
-            if not all(b.level >= threshold for b in all_buildings):
+                                    f"Cannot raise stable above level {required_level} without other buildings being level {required_level}")
+            all_buildings = db.query(Building).filter(Building.stable_id == stable_id).all()
+            if not all(b.level >= required_level for b in all_buildings if b.type not in ("administration", "stable")):
                 raise HTTPException(status.HTTP_400_BAD_REQUEST,
-                                    f"All other buildings must be at least level {threshold} to upgrade stable")
+                                    f"All other buildings must be level {required_level} to upgrade stable")
 
-            # Если всё ок, обновляем уровень stable
-            stable.level = blevel
+        stable.level = blevel
+        # Добавляем боксы, если поднялся уровень
+        current_boxes = db.query(Box).filter(Box.stable_id == stable_id).count()
+        if blevel > current_boxes:
+            for i in range(current_boxes, blevel):
+                db.add(Box(name=f"Box {i+1}", stable_id=stable_id))
+        db.commit()
+        db.refresh(stable)
 
-            # Синхронизация количества боксов
-            current_boxes = db.query(Box).filter(Box.stable_id == stable_id).count()
-            if blevel > current_boxes:
-                for i in range(current_boxes, blevel):
-                    db.add(Box(name=f"Box {i+1}", stable_id=stable.id))
-
-            db.commit()
-            db.refresh(stable)
-
-    # Ограничение: прочие здания не могут быть выше уровня stable
     elif blevel > stable.level:
         raise HTTPException(status.HTTP_400_BAD_REQUEST,
                             f"{btype} level cannot exceed stable level ({stable.level})")
@@ -177,9 +156,11 @@ def build_building(
         building.level = blevel
     else:
         building = Building(
+            id=str(uuid.uuid4()),
             type=btype,
             level=blevel,
             stable_id=stable_id,
+            owner_id=current.id,
         )
         db.add(building)
 

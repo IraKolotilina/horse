@@ -1,6 +1,11 @@
-from typing import Optional
-from app.models.player import Player
-from sqlalchemy import create_engine, text
+import uuid
+import pytest
+from fastapi.testclient import TestClient
+from app.main import app
+from sqlalchemy import create_engine
+
+
+client = TestClient(app)
 
 
 url = "postgresql://horse_user:horse_pass@localhost/horse_game_db"
