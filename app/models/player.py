@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime, Float
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.models.base import Base
@@ -13,9 +13,7 @@ class Player(Base):
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     last_login = Column(DateTime, nullable=True)
 
+    real_currency = Column(Float, default=0.0)  # <--- добавь это поле!
+
     stables = relationship("Stable", back_populates="owner")
     horses = relationship("Horse", back_populates="owner")
-    # buildings = ... (нет такой связи)
-    # currency = ... (если нужно)
-
-    # Добавьте другие связи по необходимости
