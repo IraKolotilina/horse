@@ -1,14 +1,16 @@
-# app/schemas/building.py
-from pydantic import BaseModel, ConfigDict
-from datetime import datetime
-from typing import Optional
+from pydantic import BaseModel, Field
 
 
-class BuildingResponse(BaseModel):
-    id: int
+class BuildingCreate(BaseModel):
+    type: str
+    level: int = Field(..., ge=1)
+
+
+class BuildingOut(BaseModel):
+    id: str
     type: str
     level: int
-    created_at: datetime
+    stable_id: str
 
     class Config:
         from_attributes = True

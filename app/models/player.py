@@ -20,5 +20,6 @@ class Player(Base):
     buildings = relationship("Building", back_populates="owner")
     stables = relationship("Stable", back_populates="owner", cascade="all, delete-orphan")
     horses = relationship("Horse", back_populates="owner", cascade="all, delete-orphan")
+
     
 

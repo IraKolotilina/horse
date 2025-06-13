@@ -1,23 +1,38 @@
-# app/schemas/stable.py
-from pydantic import BaseModel, ConfigDict
-from typing import List
-from typing import Optional
+from pydantic import BaseModel, Field
+from typing import Optional, List
 
-
-class BoxOut(BaseModel):
-    id: int
-    name: str
-    capacity: int
-    stable_id: str  # Было: int — ⚠ тип UUID = str
-    model_config = ConfigDict(from_attributes=True)
 
 class StableCreate(BaseModel):
     name: str
 
+
 class StableOut(BaseModel):
-    id: str  # ← Было: int, а в базе UUID → str
+    id: str
     name: str
     level: int
-    owner_id: int
-    boxes: List[BoxOut] = []
-    model_config = ConfigDict(from_attributes=True)
+
+    class Config:
+        from_attributes = True
+
+
+class BoxOut(BaseModel):
+    id: str
+    name: str
+
+    class Config:
+        from_attributes = True
+
+
+class BuildingCreate(BaseModel):
+    type: str
+    level: int = Field(..., ge=1)
+
+
+class BuildingOut(BaseModel):
+    id: str
+    type: str
+    level: int
+    stable_id: str
+
+    class Config:
+        from_attributes = True
