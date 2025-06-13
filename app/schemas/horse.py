@@ -1,6 +1,8 @@
 from pydantic import BaseModel, Field
 from typing import Optional
 from enum import Enum
+from uuid import uuid4
+
 
 
 class HorseType(str, Enum):

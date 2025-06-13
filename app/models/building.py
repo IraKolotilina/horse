@@ -1,6 +1,8 @@
 from sqlalchemy import Column, String, Integer, ForeignKey
 from sqlalchemy.orm import relationship
 from app.models.base import Base
+from uuid import uuid4
+
 
 
 class Building(Base):

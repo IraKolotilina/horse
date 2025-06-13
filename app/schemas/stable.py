@@ -1,10 +1,10 @@
 from pydantic import BaseModel, Field
 from typing import Optional, List
+from uuid import uuid4
 
 
 class StableCreate(BaseModel):
     name: str
-
 
 class StableOut(BaseModel):
     id: str
@@ -14,7 +14,6 @@ class StableOut(BaseModel):
     class Config:
         from_attributes = True
 
-
 class BoxOut(BaseModel):
     id: str
     name: str
@@ -22,11 +21,9 @@ class BoxOut(BaseModel):
     class Config:
         from_attributes = True
 
-
 class BuildingCreate(BaseModel):
-    type: str
+    type: str  # оставляем type!
     level: int = Field(..., ge=1)
-
 
 class BuildingOut(BaseModel):
     id: str
