@@ -17,3 +17,4 @@ class Player(Base):
 
     stables = relationship("Stable", back_populates="owner")
     horses = relationship("Horse", back_populates="owner")
+    buildings = relationship("Building", back_populates="owner")  # <--- ВАЖНО! (исправляет ошибку)
