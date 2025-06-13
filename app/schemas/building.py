@@ -1,11 +1,8 @@
-from pydantic import BaseModel, Field
-from uuid import uuid4
-
+from pydantic import BaseModel, ConfigDict, Field
 
 class BuildingCreate(BaseModel):
     type: str
     level: int = Field(..., ge=1)
-
 
 class BuildingOut(BaseModel):
     id: str
@@ -13,5 +10,4 @@ class BuildingOut(BaseModel):
     level: int
     stable_id: str
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

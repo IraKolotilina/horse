@@ -1,13 +1,8 @@
-# app/schemas/box.py
 from pydantic import BaseModel, ConfigDict
-from datetime import datetime
-from typing import Optional
 
-
-class BoxResponse(BaseModel):
-    id: int
+class BoxOut(BaseModel):
+    id: str
     name: str
-    created_at: datetime
+    stable_id: str
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
