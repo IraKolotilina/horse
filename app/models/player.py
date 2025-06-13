@@ -10,5 +10,4 @@ class Player(Base):
     password = Column(String, nullable=False)
     email = Column(String, unique=True, nullable=True)
     stables = relationship("Stable", back_populates="owner")
-    # buildings = relationship("Building", back_populates="player")  # <-- УДАЛИТЬ ЭТУ СТРОКУ!
     horses = relationship("Horse", back_populates="owner")

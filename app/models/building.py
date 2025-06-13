@@ -10,7 +10,6 @@ class Building(Base):
     type = Column(String, nullable=False)
     level = Column(Integer, nullable=False)
     stable_id = Column(String, ForeignKey("stables.id"), nullable=False)
-    player_id = Column(Integer, ForeignKey("players.id"), nullable=False)  # ОБЯЗАТЕЛЬНО!
 
     stable = relationship("Stable", back_populates="buildings")
-    player = relationship("Player", back_populates="buildings")
+    # !!! Никаких player = relationship(...) тут больше быть не должно !!!
