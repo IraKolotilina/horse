@@ -10,6 +10,10 @@ from app.models.box import Box
 from app.models.building import Building
 from app.models.player import Player
 from app.models.horse import Horse
+from app.schemas.building import BuildingCreate, BuildingOut
+from app.schemas.box import BoxOut
+from app.schemas.stable import StableCreate, StableOut
+
 
 stable_router = APIRouter()
 
