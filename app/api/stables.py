@@ -26,7 +26,8 @@ BUILDING_TYPES = {
     "arena": 1,
     "plaza": 1,
     "race_track": 1,
-    "administration": 1
+    "administration": 1,
+    "stable": 1
 }
 
 MAX_RESOURCE_BUILDINGS = 9  # поле + лесопилка + пастбище
@@ -38,13 +39,22 @@ def create_stable(
     db: Session = Depends(get_db),
     current: Player = Depends(get_current_user)
 ):
+    # Создание Stable
     new = Stable(name=data.name, owner_id=current.id)
     db.add(new)
     db.flush()
 
-    if new.level == 1:
-        for i in range(2):
-            db.add(Box(name=f"Box {i+1}", stable_id=new.id))
+    # Автоматически создаём здание "administration"
+    admin_building = Building(
+        type="administration",
+        level=1,
+        stable_id=new.id
+    )
+    db.add(admin_building)
+
+    # Количество боксов = уровню stable (по умолчанию 1)
+    for i in range(new.level):
+        db.add(Box(name=f"Box {i+1}", stable_id=new.id))
 
     db.commit()
     db.refresh(new)
@@ -116,25 +126,35 @@ def build_building(
         if total + 1 > MAX_RESOURCE_BUILDINGS:
             raise HTTPException(status.HTTP_400_BAD_REQUEST, "Resource building limit reached")
 
-    # Повышение уровня КОНЮШНИ — строгая проверка каждые 5 уровней
-    if btype == "administration":
+    # Повышение уровня stable ("конюшни")
+    if btype == "stable":
         if blevel > stable.level:
-            current_threshold = (stable.level // 5) * 5
-            required_level = current_threshold + 5
-            if blevel > required_level:
+            # Проверка: нельзя повысить stable выше порога, пока все остальные здания не равны этому порогу
+            threshold = (stable.level // 5) * 5 + 5
+            if blevel > threshold:
                 raise HTTPException(status.HTTP_400_BAD_REQUEST,
-                                    f"Cannot raise stable above level {required_level} without other buildings being level {required_level}")
-            all_buildings = db.query(Building).filter(Building.stable_id == stable_id).all()
-            if not all(b.level >= required_level for b in all_buildings if b.type != "administration"):
+                                    f"Cannot raise stable above level {threshold} without all buildings being level {threshold}")
+            all_buildings = db.query(Building).filter(
+                Building.stable_id == stable_id,
+                Building.type != "stable"
+            ).all()
+            if not all(b.level >= threshold for b in all_buildings):
                 raise HTTPException(status.HTTP_400_BAD_REQUEST,
-                                    f"All other buildings must be level {required_level} to upgrade stable")
+                                    f"All other buildings must be at least level {threshold} to upgrade stable")
 
-        # если всё ок — обновляем уровень stable
-        stable.level = blevel
-        db.commit()
-        db.refresh(stable)
+            # Если всё ок, обновляем уровень stable
+            stable.level = blevel
 
-    # Ограничение: прочие здания не могут быть выше уровня конюшни
+            # Синхронизация количества боксов
+            current_boxes = db.query(Box).filter(Box.stable_id == stable_id).count()
+            if blevel > current_boxes:
+                for i in range(current_boxes, blevel):
+                    db.add(Box(name=f"Box {i+1}", stable_id=stable.id))
+
+            db.commit()
+            db.refresh(stable)
+
+    # Ограничение: прочие здания не могут быть выше уровня stable
     elif blevel > stable.level:
         raise HTTPException(status.HTTP_400_BAD_REQUEST,
                             f"{btype} level cannot exceed stable level ({stable.level})")
@@ -147,7 +167,6 @@ def build_building(
             type=btype,
             level=blevel,
             stable_id=stable_id,
-            owner_id=current.id,
         )
         db.add(building)
 
