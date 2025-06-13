@@ -13,7 +13,16 @@ from app.models.horse import Horse
 from app.schemas.building import BuildingCreate, BuildingOut
 from app.schemas.box import BoxOut
 from app.schemas.stable import StableCreate, StableOut
-
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from app.schemas.stable import StableCreate, StableOut
+from app.schemas.building import BuildingCreate, BuildingOut
+from app.core.database import get_db
+from app.core.security import get_current_user
+from app.models.stable import Stable
+from app.models.box import Box
+from app.models.building import Building
+from app.models.player import Player
 
 stable_router = APIRouter()
 

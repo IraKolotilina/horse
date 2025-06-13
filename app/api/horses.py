@@ -10,6 +10,11 @@ from app.models.horse import Horse
 from app.models.player import Player as PlayerModel
 from app.models.stable import Stable
 from app.schemas.horse import HorseCreate, HorseResponse, HorseBreedRequest, HorseUpdate
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from app.core.security import get_current_user
+from app.models.stable import Stable
+from app.models.horse import Horse
 
 
 horse_router = APIRouter()
