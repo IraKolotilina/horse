@@ -1,7 +1,7 @@
+# app/schemas/stable.py
+
 from pydantic import BaseModel, Field
 from typing import Optional, List
-from uuid import uuid4
-
 
 class StableCreate(BaseModel):
     name: str
@@ -22,7 +22,7 @@ class BoxOut(BaseModel):
         from_attributes = True
 
 class BuildingCreate(BaseModel):
-    type: str  # оставляем type!
+    type: str
     level: int = Field(..., ge=1)
 
 class BuildingOut(BaseModel):
